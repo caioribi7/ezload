@@ -1,0 +1,50 @@
+[build-system]
+requires = ["hatchling>=1.25"]
+build-backend = "hatchling.build"
+
+[project]
+name = "ezload"
+version = "0.1.0"
+description = "Baixa vídeo (MP4) ou áudio (MP3) do YouTube, TikTok e Instagram pelo terminal. Grátis e open source."
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.10"
+authors = [{ name = "caioribi7" }]
+keywords = ["downloader", "youtube", "tiktok", "instagram", "mp3", "mp4", "cli", "yt-dlp"]
+classifiers = [
+  "Environment :: Console",
+  "Intended Audience :: End Users/Desktop",
+  "Topic :: Multimedia :: Video",
+  "Programming Language :: Python :: 3",
+]
+dependencies = [
+  "yt-dlp[default]>=2025.11.12",  # [default] traz o yt-dlp-ejs, que o YouTube exige
+  "imageio-ffmpeg>=0.5",          # ffmpeg embutido: ninguém precisa instalar nada à parte
+  "deno>=2.0",                    # runtime JS embutido, usado pelo yt-dlp no YouTube
+  "typer>=0.12",
+  "rich>=13.7",
+]
+
+[project.optional-dependencies]
+masterbase = ["psycopg[binary]>=3.1"]
+dev = ["pytest>=8", "ruff>=0.5", "pyinstaller>=6.10"]
+
+[project.scripts]
+ezload = "ezload.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/caioribi7/ezload"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/ezload"]
+
+[tool.ruff]
+line-length = 110
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "B", "I"]
+ignore = ["E501", "B008", "B904"]  # B008/B904: padrão do Typer
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

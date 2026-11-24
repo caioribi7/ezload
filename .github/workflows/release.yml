@@ -1,0 +1,41 @@
+name: Release
+
+# Ao criar uma tag v* (ex.: git tag v0.1.0 && git push --tags), gera o
+# EZLOAD-Setup-<versao>.exe e o .zip portátil e publica na página de Releases.
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -e ".[dev]"
+      - run: choco install innosetup -y --no-progress
+      - name: Build
+        shell: pwsh
+        run: ./packaging/build-windows.ps1
+      - name: Zip portátil
+        shell: pwsh
+        run: Compress-Archive -Path dist/ezload/* -DestinationPath dist/EZLOAD-portable-windows.zip
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ezload-windows
+          path: |
+            dist/EZLOAD-Setup-*.exe
+            dist/EZLOAD-portable-windows.zip
+      - uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: |
+            dist/EZLOAD-Setup-*.exe
+            dist/EZLOAD-portable-windows.zip
+          generate_release_notes: true
